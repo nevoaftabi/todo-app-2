@@ -163,7 +163,15 @@ function App() {
           checked={task.isCompleted}
         />
         {task.isEditMode && (
-          <input
+          <input  
+            onKeyDown={(e) => { 
+              if(e.key === 'Enter') {
+                setTaskEdit(task)
+              }
+              else if(e.key === 'Escape') {
+                handleDeleteOrCancel(task);
+              }
+            }}
             value={task.tempTitle}
             onChange={(e) => setTaskItemTitle(e, task)}
           ></input>
