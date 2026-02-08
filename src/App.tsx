@@ -7,9 +7,11 @@ export type Task = {
   isCompleted: boolean;
   isEditMode: boolean;
   tempTitle: string;
+  createdAt: number;
 };
 
 type Filter = "all" | "active" | "done";
+type DateSort = "oldest" | "newest";
 
 export type TaskProps = Task & {
   onChangeTitle: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -22,6 +24,12 @@ function App() {
   const [filter, setFilter] = useState<Filter>("all");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [didLoad, setDidLoad] = useState(false);
+  const [dateSort, setDateFilter] = useState<DateSort>("newest");
+
+  const options = [
+    { label: "Newest", value: "newest" },
+    { label: "Oldest", value: "oldest" },
+  ];
 
   useEffect(() => {
     try {
@@ -65,6 +73,12 @@ function App() {
   //   },
   // ]);
 
+  const handleDateSortChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value === "newest" || e.target.value === "oldest") {
+      setDateFilter(e.target.value);
+    }
+  };
+
   const addTask = () => {
     const title = taskTitle.trim();
     const subject = taskSubject.trim();
@@ -83,6 +97,7 @@ function App() {
         isCompleted: false,
         isEditMode: false,
         tempTitle: "",
+        createdAt: Date.now(),
       },
     ]);
 
@@ -114,16 +129,17 @@ function App() {
     }
 
     const newTitle = task.tempTitle.trim();
-    
+
     if (!newTitle) {
       alert("You need a title");
       return;
     }
 
-    task = { ...task, tempTitle: "" };
     setTasks((prev) =>
       prev.map((t) =>
-        t.id === task.id ? { ...t, title: newTitle, tempTitle: "", isEditMode: false } : t,
+        t.id === task.id
+          ? { ...t, title: newTitle, tempTitle: "", isEditMode: false }
+          : t,
       ),
     );
   };
@@ -150,11 +166,22 @@ function App() {
   };
 
   const displayTasks = () => {
-    const visibleTasks = tasks.filter((t) => {
+    let visibleTasks = tasks.filter((t) => {
       if (filter === "active") return !t.isCompleted;
       if (filter === "done") return t.isCompleted;
       return true;
     });
+
+    if (dateSort === "newest") {
+      visibleTasks = [...visibleTasks].sort(
+        (a, b) => b.createdAt - a.createdAt,
+      );
+    } else {
+      visibleTasks = [...visibleTasks].sort(
+        (a, b) => a.createdAt - b.createdAt,
+      );
+    }
+
     return visibleTasks.map((task) => (
       <li key={task.id}>
         <input
@@ -163,12 +190,11 @@ function App() {
           checked={task.isCompleted}
         />
         {task.isEditMode && (
-          <input  
-            onKeyDown={(e) => { 
-              if(e.key === 'Enter') {
-                setTaskEdit(task)
-              }
-              else if(e.key === 'Escape') {
+          <input
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setTaskEdit(task);
+              } else if (e.key === "Escape") {
                 handleDeleteOrCancel(task);
               }
             }}
@@ -196,7 +222,7 @@ function App() {
       <h1>📘 Study Tracker</h1>
       <label htmlFor="task-title">Title </label>
       <input
-        onKeyDown={(e) => e.key === 'Enter' && addTask() }
+        onKeyDown={(e) => e.key === "Enter" && addTask()}
         type="text"
         id="task-title"
         value={taskTitle}
@@ -205,7 +231,7 @@ function App() {
       <br /> <br />
       <label htmlFor="task-subject">Task Subject </label>
       <input
-        onKeyDown={(e) => e.key === 'Enter' && addTask() }
+        onKeyDown={(e) => e.key === "Enter" && addTask()}
         type="text"
         id="task-subject"
         value={taskSubject}
@@ -234,6 +260,19 @@ function App() {
       >
         Done
       </button>
+      Sort by
+      <select
+        value={dateSort}
+        onChange={handleDateSortChange}
+        name="date-filter"
+        id="date-filter"
+      >
+        {options.map((option) => (
+          <option key={option.label} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
       <ul>{displayTasks()}</ul>
     </>
   );
