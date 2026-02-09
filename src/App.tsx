@@ -24,7 +24,8 @@ function App() {
   const [filter, setFilter] = useState<Filter>("all");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [didLoad, setDidLoad] = useState(false);
-  const [dateSort, setDateFilter] = useState<DateSort>("newest");
+  const [dateSort, setDateSort] = useState<DateSort>("newest");
+  const [search, setSearch] = useState("");
 
   const options = [
     { label: "Newest", value: "newest" },
@@ -39,10 +40,12 @@ function App() {
         const parsed = JSON.parse(storedTasks);
 
         if (Array.isArray(parsed)) {
+          console.log(parsed);
           setTasks(parsed);
         }
       }
-    } catch (e: unknown) {
+    } 
+    catch (e: unknown) {
       console.log(e);
     }
 
@@ -55,27 +58,9 @@ function App() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks, didLoad]);
 
-  //   {
-  //     id: crypto.randomUUID(),
-  //     title: "Finish SQL lab",
-  //     subject: "Databases",
-  //     isCompleted: false,
-  //     isEditMode: false,
-  //     tempTitle: "",
-  //   },
-  //   {
-  //     id: crypto.randomUUID(),
-  //     title: "Node.js application",
-  //     subject: "Backend",
-  //     isCompleted: false,
-  //     isEditMode: false,
-  //     tempTitle: "",
-  //   },
-  // ]);
-
   const handleDateSortChange = (e: ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value === "newest" || e.target.value === "oldest") {
-      setDateFilter(e.target.value);
+      setDateSort(e.target.value);
     }
   };
 
@@ -92,8 +77,8 @@ function App() {
       ...tasks,
       {
         id: crypto.randomUUID(),
-        title: taskTitle,
-        subject: taskSubject,
+        title,
+        subject,
         isCompleted: false,
         isEditMode: false,
         tempTitle: "",
@@ -122,7 +107,7 @@ function App() {
     if (!task.isEditMode) {
       setTasks((prev) =>
         prev.map((t) =>
-          t.id === task.id ? { ...t, tempTitle: t.title, isEditMode: true } : t,
+          t.id === task.id ? { ...t, tempTitle: t.title, isEditMode: true } : { ...t, isEditMode: false },
         ),
       );
       return;
@@ -156,7 +141,6 @@ function App() {
     if (!task.isEditMode) {
       setTasks((prev) => prev.filter((t) => t.id !== task.id));
     } else {
-      // handle edit cancel
       setTasks((prev) =>
         prev.map((t) =>
           t.id === task.id ? { ...t, tempTitle: "", isEditMode: false } : t,
@@ -171,6 +155,13 @@ function App() {
       if (filter === "done") return t.isCompleted;
       return true;
     });
+
+    const searchTrimmed = search.trim().toLowerCase();
+    if (searchTrimmed) {
+      visibleTasks = [...visibleTasks].filter((task) =>
+        task.title.toLowerCase().includes(searchTrimmed),
+      );
+    }
 
     if (dateSort === "newest") {
       visibleTasks = [...visibleTasks].sort(
@@ -273,6 +264,12 @@ function App() {
           </option>
         ))}
       </select>
+      Search:{" "}
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
       <ul>{displayTasks()}</ul>
     </>
   );
