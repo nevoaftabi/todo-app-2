@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import type { Task } from "./components/Task";
 import TaskForm from "./components/TaskForm";
 import ControlsBar from "./components/ControlsBar";
+import TaskList from "./components/TaskList";
 
 export type Filter = "all" | "active" | "done";
 export type DateSort = "oldest" | "newest";
@@ -10,10 +11,28 @@ function App() {
   const [taskTitle, setTaskTitle] = useState("");
   const [taskSubject, setTaskSubject] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [didLoad, setDidLoad] = useState(false);
   const [dateSort, setDateSort] = useState<DateSort>("newest");
   const [search, setSearch] = useState("");
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    let parsed;
+    let valid = false;
+    try {
+      const storedTasks = localStorage.getItem("tasks");
+
+      if (storedTasks) {
+        parsed = JSON.parse(storedTasks);
+        valid = Array.isArray(parsed);
+      }
+    } catch (e: unknown) {
+      console.log(e);
+    }
+
+    if (valid) {
+      return parsed;
+    }
+
+    return [];
+  });
 
   const addTask = () => {
     const trimmedTitle = taskTitle.trim();
@@ -42,29 +61,8 @@ function App() {
   };
 
   useEffect(() => {
-    try {
-      const storedTasks = localStorage.getItem("tasks");
-
-      if (storedTasks) {
-        const parsed = JSON.parse(storedTasks);
-
-        if (Array.isArray(parsed)) {
-          console.log(parsed);
-          setTasks(parsed);
-        }
-      }
-    } catch (e: unknown) {
-      console.log(e);
-    }
-
-    setDidLoad(true);
-  }, []);
-
-  useEffect(() => {
-    if (!didLoad) return;
-
     localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks, didLoad]);
+  }, [tasks]);
 
   const handleDateSortChange = (e: ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value === "newest" || e.target.value === "oldest") {
@@ -159,39 +157,15 @@ function App() {
       );
     }
 
-    return visibleTasks.map((task) => (
-      <li key={task.id}>
-        <input
-          type="checkbox"
-          onChange={(e) => handleCompleted(e, task.id)}
-          checked={task.isCompleted}
-        />
-        {task.isEditMode && (
-          <input
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                setTaskEdit(task);
-              } else if (e.key === "Escape") {
-                handleDeleteOrCancel(task);
-              }
-            }}
-            value={task.tempTitle}
-            onChange={(e) => setTaskItemTitle(e, task)}
-          ></input>
-        )}
-        {!task.isEditMode && (
-          <span>
-            {task.title} | {task.subject}
-          </span>
-        )}
-        <button onClick={() => setTaskEdit(task)}>
-          {task.isEditMode ? "✅" : "✏️"}
-        </button>
-        <button onClick={() => handleDeleteOrCancel(task)}>
-          {task.isEditMode ? "Cancel" : "🗑️"}{" "}
-        </button>
-      </li>
-    ));
+    return (
+      <TaskList
+        tasks={visibleTasks}
+        onDeleteOrCancelEdit={handleDeleteOrCancel}
+        onEditOrConfirmTitle={setTaskEdit}
+        onSetTaskTitle={setTaskItemTitle}
+        onSetCompleted={handleCompleted}
+      />
+    );
   };
 
   return (

@@ -8,13 +8,23 @@ export type TaskFormProps = {
   onAdd: () => void;
 };
 
-const TaskForm = ({ title, subject, onChangeTitle, onChangeSubject, onAdd }: TaskFormProps) => {
+const TaskForm = ({
+  title,
+  subject,
+  onChangeTitle,
+  onChangeSubject,
+  onAdd,
+}: TaskFormProps) => {
   return (
     <>
-      <form onSubmit={(e) => { e.preventDefault(); onAdd(); }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onAdd();
+        }}
+      >
         <label htmlFor="task-title">Title </label>
         <input
-          onKeyDown={(e) => e.key === "Enter" && onAdd()}
           type="text"
           id="task-title"
           value={title}
@@ -23,7 +33,6 @@ const TaskForm = ({ title, subject, onChangeTitle, onChangeSubject, onAdd }: Tas
         <br /> <br />
         <label htmlFor="task-subject">Task Subject </label>
         <input
-          onKeyDown={(e) => e.key === "Enter" && onAdd()}
           type="text"
           id="task-subject"
           value={subject}

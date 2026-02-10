@@ -21,7 +21,7 @@ const ControlsBar = ({
   onSearchChange,
   dateSort,
   setFilter,
-  onDateSortChange
+  onDateSortChange,
 }: ControlsBarProps) => {
   return (
     <>
