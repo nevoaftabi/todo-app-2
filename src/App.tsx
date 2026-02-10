@@ -1,22 +1,10 @@
 import { useEffect, useState, type ChangeEvent } from "react";
+import type { Task } from "./components/Task";
+import TaskForm from "./components/TaskForm";
+import ControlsBar from "./components/ControlsBar";
 
-export type Task = {
-  id: string;
-  title: string;
-  subject: string;
-  isCompleted: boolean;
-  isEditMode: boolean;
-  tempTitle: string;
-  createdAt: number;
-};
-
-type Filter = "all" | "active" | "done";
-type DateSort = "oldest" | "newest";
-
-export type TaskProps = Task & {
-  onChangeTitle: (e: ChangeEvent<HTMLInputElement>) => void;
-  onChangeSubject: (e: ChangeEvent<HTMLInputElement>) => void;
-};
+export type Filter = "all" | "active" | "done";
+export type DateSort = "oldest" | "newest";
 
 function App() {
   const [taskTitle, setTaskTitle] = useState("");
@@ -27,10 +15,31 @@ function App() {
   const [dateSort, setDateSort] = useState<DateSort>("newest");
   const [search, setSearch] = useState("");
 
-  const options = [
-    { label: "Newest", value: "newest" },
-    { label: "Oldest", value: "oldest" },
-  ];
+  const addTask = () => {
+    const trimmedTitle = taskTitle.trim();
+    const trimmedSubject = taskSubject.trim();
+
+    if (!trimmedTitle || !trimmedSubject) {
+      alert("The title or subject is missing");
+      return;
+    }
+
+    setTasks((tasks) => [
+      ...tasks,
+      {
+        id: crypto.randomUUID(),
+        title: trimmedTitle,
+        subject: trimmedSubject,
+        isCompleted: false,
+        isEditMode: false,
+        tempTitle: "",
+        createdAt: Date.now(),
+      },
+    ]);
+
+    setTaskTitle("");
+    setTaskSubject("");
+  };
 
   useEffect(() => {
     try {
@@ -39,19 +48,7 @@ function App() {
       if (storedTasks) {
         const parsed = JSON.parse(storedTasks);
 
-        if (
-          Array.isArray(parsed) &&
-          parsed.every(
-            (t) =>
-              typeof t.id === "number" &&
-              typeof t.title === "string" &&
-              typeof t.tempTitle === "string" &&
-              typeof t.createdAt === "number" &&
-              typeof t.isCompleted === "boolean" &&
-              typeof t.subject === "string" &&
-              typeof t.isEditMode === "boolean",
-          )
-        ) {
+        if (Array.isArray(parsed)) {
           console.log(parsed);
           setTasks(parsed);
         }
@@ -73,32 +70,6 @@ function App() {
     if (e.target.value === "newest" || e.target.value === "oldest") {
       setDateSort(e.target.value);
     }
-  };
-
-  const addTask = () => {
-    const title = taskTitle.trim();
-    const subject = taskSubject.trim();
-
-    if (!title || !subject) {
-      alert("The title or subject is missing");
-      return;
-    }
-
-    setTasks((tasks) => [
-      ...tasks,
-      {
-        id: crypto.randomUUID(),
-        title,
-        subject,
-        isCompleted: false,
-        isEditMode: false,
-        tempTitle: "",
-        createdAt: Date.now(),
-      },
-    ]);
-
-    setTaskTitle("");
-    setTaskSubject("");
   };
 
   const handleCompleted = (
@@ -171,8 +142,10 @@ function App() {
 
     const searchTrimmed = search.trim().toLowerCase();
     if (searchTrimmed) {
-      visibleTasks = [...visibleTasks].filter((task) =>
-        task.title.toLowerCase().includes(searchTrimmed),
+      visibleTasks = [...visibleTasks].filter(
+        (task) =>
+          task.title.toLowerCase().includes(searchTrimmed) ||
+          task.subject.toLowerCase().includes(searchTrimmed),
       );
     }
 
@@ -224,68 +197,26 @@ function App() {
   return (
     <>
       <h1>📘 Study Tracker</h1>
-      <label htmlFor="task-title">Title </label>
-      <input
-        onKeyDown={(e) => e.key === "Enter" && addTask()}
-        type="text"
-        id="task-title"
-        value={taskTitle}
-        onChange={(e) => setTaskTitle(e.target.value)}
+      <TaskForm
+        onAdd={addTask}
+        title={taskTitle}
+        subject={taskSubject}
+        onChangeSubject={(e) => setTaskSubject(e.target.value)}
+        onChangeTitle={(e) => setTaskTitle(e.target.value)}
       />
-      <br /> <br />
-      <label htmlFor="task-subject">Task Subject </label>
-      <input
-        onKeyDown={(e) => e.key === "Enter" && addTask()}
-        type="text"
-        id="task-subject"
-        value={taskSubject}
-        onChange={(e) => setTaskSubject(e.target.value)}
-      />
-      <button onClick={addTask}>Add</button>
       <hr />
-      Filters:
-      <button
-        onClick={() => setFilter("all")}
-        style={{ backgroundColor: filter === "all" ? "green" : "#f0f0f0" }}
-      >
-        All
-      </button>
-      |
-      <button
-        onClick={() => setFilter("active")}
-        style={{ backgroundColor: filter === "active" ? "green" : "#f0f0f0" }}
-      >
-        Active
-      </button>
-      |
-      <button
-        onClick={() => setFilter("done")}
-        style={{ backgroundColor: filter === "done" ? "green" : "#f0f0f0" }}
-      >
-        Done
-      </button>
-      Sort by
-      <select
-        value={dateSort}
-        onChange={handleDateSortChange}
-        name="date-filter"
-        id="date-filter"
-      >
-        {options.map((option) => (
-          <option key={option.label} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      Search:{" "}
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+
+      <ControlsBar
+        dateSort={dateSort}
+        filter={filter}
+        onDateSortChange={handleDateSortChange}
+        onSearchChange={(e) => setSearch(e.target.value)}
+        search={search}
+        setFilter={(filter: Filter) => setFilter(filter)}
       />
+
       <ul>{displayTasks()}</ul>
     </>
   );
 }
-
 export default App;
