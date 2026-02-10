@@ -39,13 +39,24 @@ function App() {
       if (storedTasks) {
         const parsed = JSON.parse(storedTasks);
 
-        if (Array.isArray(parsed)) {
+        if (
+          Array.isArray(parsed) &&
+          parsed.every(
+            (t) =>
+              typeof t.id === "number" &&
+              typeof t.title === "string" &&
+              typeof t.tempTitle === "string" &&
+              typeof t.createdAt === "number" &&
+              typeof t.isCompleted === "boolean" &&
+              typeof t.subject === "string" &&
+              typeof t.isEditMode === "boolean",
+          )
+        ) {
           console.log(parsed);
           setTasks(parsed);
         }
       }
-    } 
-    catch (e: unknown) {
+    } catch (e: unknown) {
       console.log(e);
     }
 
@@ -107,7 +118,9 @@ function App() {
     if (!task.isEditMode) {
       setTasks((prev) =>
         prev.map((t) =>
-          t.id === task.id ? { ...t, tempTitle: t.title, isEditMode: true } : { ...t, isEditMode: false },
+          t.id === task.id
+            ? { ...t, tempTitle: t.title, isEditMode: true }
+            : { ...t, isEditMode: false },
         ),
       );
       return;
