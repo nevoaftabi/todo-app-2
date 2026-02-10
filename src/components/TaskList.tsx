@@ -49,6 +49,7 @@ const TaskList = ({
               {task.title} | {task.subject}
             </span>
           )}
+          <label htmlFor=""> Due date: {task.dueDate}</label>
           <button onClick={() => onEditOrConfirmTitle(task)}>{task.isEditMode ? "✅" : "✏️"}</button>
           <button onClick={() => onDeleteOrCancelEdit(task)}>
             {task.isEditMode ? "Cancel" : "🗑️"}{" "}

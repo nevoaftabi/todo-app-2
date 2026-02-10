@@ -13,6 +13,7 @@ function App() {
   const [filter, setFilter] = useState<Filter>("all");
   const [dateSort, setDateSort] = useState<DateSort>("newest");
   const [search, setSearch] = useState("");
+  const [taskDueDate, setTaskDueDate] = useState('');
   const [tasks, setTasks] = useState<Task[]>(() => {
     let parsed;
     let valid = false;
@@ -53,11 +54,13 @@ function App() {
         isEditMode: false,
         tempTitle: "",
         createdAt: Date.now(),
+        dueDate: taskDueDate
       },
     ]);
 
     setTaskTitle("");
     setTaskSubject("");
+    setTaskDueDate("");
   };
 
   useEffect(() => {
@@ -143,7 +146,8 @@ function App() {
       visibleTasks = [...visibleTasks].filter(
         (task) =>
           task.title.toLowerCase().includes(searchTrimmed) ||
-          task.subject.toLowerCase().includes(searchTrimmed),
+          task.subject.toLowerCase().includes(searchTrimmed) || 
+          task.dueDate.includes(searchTrimmed),
       );
     }
 
@@ -177,6 +181,8 @@ function App() {
         subject={taskSubject}
         onChangeSubject={(e) => setTaskSubject(e.target.value)}
         onChangeTitle={(e) => setTaskTitle(e.target.value)}
+        onChangeDate={(e) => setTaskDueDate(e.target.value)}
+        dueDate={taskDueDate}
       />
       <hr />
 

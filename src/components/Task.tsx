@@ -6,4 +6,6 @@ export type Task = {
   isEditMode: boolean;
   tempTitle: string;
   createdAt: number;
+  dueDate: string;
 };
+
