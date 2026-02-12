@@ -24,23 +24,24 @@ const ControlsBar = ({
   onDateSortChange,
 }: ControlsBarProps) => {
   return (
-    <>
+    <div className="flex flex-wrap items-center gap-3">
       <label htmlFor="">Filters: </label>
       <button
+        className="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300"
         onClick={() => setFilter("all")}
         style={{ backgroundColor: filter === "all" ? "green" : "#f0f0f0" }}
       >
         All
       </button>
-      |
       <button
+        className=" gap-3 px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300"
         onClick={() => setFilter("active")}
         style={{ backgroundColor: filter === "active" ? "green" : "#f0f0f0" }}
       >
         Active
       </button>
-      |
       <button
+        className="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300"
         onClick={() => setFilter("done")}
         style={{ backgroundColor: filter === "done" ? "green" : "#f0f0f0" }}
       >
@@ -48,6 +49,7 @@ const ControlsBar = ({
       </button>
       <label htmlFor="">Sort by</label>
       <select
+        className="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300"
         value={dateSort}
         onChange={onDateSortChange}
         name="date-filter"
@@ -60,8 +62,14 @@ const ControlsBar = ({
         ))}
       </select>
       <label htmlFor="">Search</label>
-      <input type="text" value={search} onChange={onSearchChange} />
-    </>
+      <input
+        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+
+        type="text"
+        value={search}
+        onChange={onSearchChange}
+      />
+    </div>
   );
 };
 
