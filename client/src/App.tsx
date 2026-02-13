@@ -4,6 +4,8 @@ import TaskForm, { type TaskFormProps } from "./components/TaskForm";
 import ControlsBar from "./components/ControlsBar";
 import TaskList from "./components/TaskList";
 import { Routes, Route } from "react-router-dom";
+import { RequireAuth } from "./components/RequireAuth";
+import Login from "./components/Login";
 
 export type Filter = "all" | "active" | "done";
 export type DateSort = "oldest" | "newest";
@@ -233,9 +235,11 @@ function App() {
 
   return (
   <Routes>
+    <Route path="/login" element={<Login />}/>
     <Route
       path="/"
       element={
+        <RequireAuth>
         <Home
           tasks={tasks}
           setTasks={setTasks}
@@ -246,7 +250,8 @@ function App() {
           search={search}
           setSearch={setSearch}
           displayTasks={displayTasks}
-        />
+          />
+        </RequireAuth>
       }
     />
   </Routes>

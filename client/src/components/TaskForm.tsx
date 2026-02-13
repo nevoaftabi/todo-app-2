@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
+import LogoutButton from "./LogoutButton";
 
 export type TaskFormData = {
   title: string;
@@ -22,6 +23,7 @@ const formSchema = z.object({
     .min(1, "Subject is too short")
     .max(20, "Subject is too long"),
 });
+
 
 type FormErrors = Partial<Record<"title" | "subject", string>>;
 
@@ -114,6 +116,8 @@ const TaskForm = ({ onAdd }: TaskFormProps) => {
         >
           Add
         </button>
+        <LogoutButton />
+
       </form>
     </>
   );
